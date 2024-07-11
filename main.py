@@ -47,7 +47,7 @@ async def send_riddle():
                         await asyncio.sleep(wait_time)
             else:
                 logger.info("Waiting for 10 seconds (default)...")
-                await asyncio.sleep(10)  # Default wait time if no specific wait time is found
+                await asyncio.sleep(8)  # Default wait time if no specific wait time is found
         except Exception as e:
             logger.error(f"Error sending riddle: {e}")
 
