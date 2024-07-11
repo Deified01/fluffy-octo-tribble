@@ -1,0 +1,5 @@
+asyncio
+telethon
+uvloop
+logging
+Flask
