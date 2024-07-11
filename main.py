@@ -2,10 +2,18 @@ import asyncio
 import logging
 import re
 import os
+import threading
 from telethon import events, TelegramClient
 from telethon.errors import MessageIdInvalidError
 from telethon.sessions import StringSession
 import uvloop
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return 'Hello, World!'
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -15,7 +23,6 @@ api_hash = '9ec5782ddd935f7e2763e5e49a590c0d'
 string_session = "1BVtsOHYBuxXWOSoRUYuPL6Hr_MuCZjkm1eIXwNPCJwsHg3qRIg1aE55rn6BA83lNAuXRE00DGmjWesDzhqMarkD84ffWZlmHMwZPtmetKFv1G04bMcZ0DoVEi2RPwjNmRpIlotQrClfvd79e1SP53cJ6A_se8MMhAgblVtZFgZt7KpzkJzWrTwh-4b_9QVF5pVz0MUWgQ0AnwqxmD_Gzx_TPFl37S_fhBu0zR8BmNWgLVkv8_iij_FZ4HuEGw2_iHnYaQG8QyahSwMQ3jkWWwJI-T0ODGAkpMio3ko1ZDnwy1ZrqIF9fn7Y5f39Nx0O7ZkvwMMbTEECvtNeq3ODY2yXyZ8qNCSY="
 client = TelegramClient(StringSession(string_session), api_id, api_hash)
 
-from app import keep_alive
 async def main():
     await client.start()
     logger.info('''
@@ -66,9 +73,14 @@ async def ping(event):
     ms = (end_time - start_time).microseconds / 1000
     await event.respond(f'Pong! ({ms} ms)')
 
-# Minnion run
+def run_flask_app():
+    app.run(host='0.0.0.0', port=10000)
+
 if __name__ == "__main__":
+    flask_thread = threading.Thread(target=run_flask_app)
+    flask_thread.daemon = True
+    flask_thread.start()
+
     client.loop.run_until_complete(main())
     client.loop.create_task(send_riddle())
     client.run_until_disconnected()
-    keep_alive()
