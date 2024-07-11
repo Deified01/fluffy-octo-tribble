@@ -15,6 +15,7 @@ api_hash = '9ec5782ddd935f7e2763e5e49a590c0d'
 string_session = "1BVtsOHYBuxXWOSoRUYuPL6Hr_MuCZjkm1eIXwNPCJwsHg3qRIg1aE55rn6BA83lNAuXRE00DGmjWesDzhqMarkD84ffWZlmHMwZPtmetKFv1G04bMcZ0DoVEi2RPwjNmRpIlotQrClfvd79e1SP53cJ6A_se8MMhAgblVtZFgZt7KpzkJzWrTwh-4b_9QVF5pVz0MUWgQ0AnwqxmD_Gzx_TPFl37S_fhBu0zR8BmNWgLVkv8_iij_FZ4HuEGw2_iHnYaQG8QyahSwMQ3jkWWwJI-T0ODGAkpMio3ko1ZDnwy1ZrqIF9fn7Y5f39Nx0O7ZkvwMMbTEECvtNeq3ODY2yXyZ8qNCSY="
 client = TelegramClient(StringSession(string_session), api_id, api_hash)
 
+from app import keep_alive
 async def main():
     await client.start()
     logger.info('''
@@ -69,4 +70,5 @@ async def ping(event):
 if __name__ == "__main__":
     client.loop.run_until_complete(main())
     client.loop.create_task(send_riddle())
-    client.run_until_disconnected()￼Enter
+    client.run_until_disconnected()
+    keep_alive()
