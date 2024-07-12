@@ -20,7 +20,8 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 logger = logging.getLogger(__name__)
 api_id = 8447214
 api_hash = '9ec5782ddd935f7e2763e5e49a590c0d'
-string_session = "1BVtsOHYBuxXWOSoRUYuPL6Hr_MuCZjkm1eIXwNPCJwsHg3qRIg1aE55rn6BA83lNAuXRE00DGmjWesDzhqMarkD84ffWZlmHMwZPtmetKFv1G04bMcZ0DoVEi2RPwjNmRpIlotQrClfvd79e1SP53cJ6A_se8MMhAgblVtZFgZt7KpzkJzWrTwh-4b_9QVF5pVz0MUWgQ0AnwqxmD_Gzx_TPFl37S_fhBu0zR8BmNWgLVkv8_iij_FZ4HuEGw2_iHnYaQG8QyahSwMQ3jkWWwJI-T0ODGAkpMio3ko1ZDnwy1ZrqIF9fn7Y5f39Nx0O7ZkvwMMbTEECvtNeq3ODY2yXyZ8qNCSY="
+stnring_session = "1BVtsOHYBuxXWOSoRUYuPL6Hr_MuCZjkm1eIXwNPCJwsHg3qRIg1aE55rn6BA83lNAuXRE00DGmjWesDzhqMarkD84ffWZlmHMwZPtmetKFv1G04bMcZ0DoVEi2RPwjNmRpIlotQrClfvd79e1SP53cJ6A_se8MMhAgblVtZFgZt7KpzkJzWrTwh-4b_9QVF5pVz0MUWgQ0AnwqxmD_Gzx_TPFl37S_fhBu0zR8BmNWgLVkv8_iij_FZ4HuEGw2_iHnYaQG8QyahSwMQ3jkWWwJI-T0ODGAkpMio3ko1ZDnwy1ZrqIF9fn7Y5f39Nx0O7ZkvwMMbTEECvtNeq3ODY2yXyZ8qNCSY="
+string_session = os.getenv("string")
 client = TelegramClient(StringSession(string_session), api_id, api_hash)
 
 async def main():
@@ -76,6 +77,7 @@ async def ping(event):
 async def send_propose():
     while True:
         try:
+            await asyncio.sleep(2)
             await client.send_message("@lustsupport", "/propose")
             logger.info("Sent /propose")
             await asyncio.sleep(600)  # 10 minutes
@@ -85,6 +87,7 @@ async def send_propose():
 async def send_tesure():
     while True:
         try:
+            await asyncio.sleep(5)
             await client.send_message("@lustsupport", "/tesure")
             logger.info("Sent /tesure")
             await asyncio.sleep(1800)  # 30 minutes
@@ -94,6 +97,7 @@ async def send_tesure():
 async def send_shunt():
     while True:
         try:
+            await asyncio.sleep(7)
             await client.send_message("@lustsupport", "/shunt")
             logger.info("Sent /shunt")
             await asyncio.sleep(60)  # 1 minute
@@ -103,6 +107,7 @@ async def send_shunt():
 async def send_sfight():
     while True:
         try:
+            await asyncio.sleep(9)
             await client.send_message("@lustsupport", "/sfight")
             logger.info("Sent /sfight")
             await asyncio.sleep(600)  # 10 minutes
