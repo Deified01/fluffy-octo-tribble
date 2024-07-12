@@ -133,28 +133,47 @@ async def check_for_buttons():
             # Get the latest messages from the chat
             messages = await client.get_messages(lustsupport_entity, limit=10)
             for message in messages:
-                # Check if the message has buttons
-                if message.buttons:
-                    logger.info(f"Message {message.id} has buttons:")
-                    for row in message.buttons:
-                        for button in row:
-                            logger.info(f"  - {button.text}")
-                            try:
-                                await client(functions.messages.ClickMessageButtonRequest(
-                                    peer=lustsupport_entity,
-                                    msg_id=message.id,
-                                    button=button
-                                ))
-                                logger.info(f"Clicked button: {button.text}")
-                            except StartParamInvalidError:
-                                logger.error(f"StartParamInvalidError occurred while clicking button: {button.text}")
-                    logger.info(f"Message text: {message.text}")
                 # Store the start time of the message
                 message_start_times[message.id] = asyncio.get_event_loop().time()
             # Wait for 1 second before checking for new messages
             await asyncio.sleep(1)
         except Exception as e:
-            logger.error(f"Error checking for buttons: {e}")
+            logger.error(f"Error getting messages: {e}")
+
+        for message_id, start_time in list(message_start_times.items()):
+            # Check if 20 seconds have passed since the message was received
+            if asyncio.get_event_loop().time() - start_time > 20:
+                # Remove the message from the dictionary
+                del message_start_times[message_id]
+            else:
+                try:
+                    # Get the latest message from the chat
+                    latest_message = await client.get_messages(lustsupport_entity, ids=message_id)
+                    if latest_message is not None:
+                        # Check if the message has buttons
+                        if latest_message.buttons:
+                            logger.info(f"Message {message_id} has buttons:")
+                            for row in latest_message.buttons:
+                                for button in row:
+                                    logger.info(f"  - {button.text}")
+                                    try:
+                                        await client(functions.messages.ClickMessageButtonRequest(
+                                            peer=lustsupport_entity,
+                                            msg_id=message_id,
+                                            button=button
+                                        ))
+                                        logger.info(f"Clicked button: {button.text}")
+                                    except StartParamInvalidError:
+                                        logger.error(f"StartParamInvalidError occurred while clicking button: {button.text}")
+                            logger.info(f"Message text: {latest_message.text}")
+                        else:
+                            logger.info(f"Message {message_id} does not have buttons")
+                    else:
+                        logger.info(f"Message {message_id} not found")
+                except MessageIdInvalidError:
+                    # If the message ID is invalid, remove it from the dictionary
+                    del message_start_times[message_id]
+                    logger.info(f"Message {message_id} is no longer valid")
 
 async def schedule_tasks():
     # Define the chat entity of the "@lustXcatcherrobot" chat
@@ -194,7 +213,7 @@ async def send_explore_command(chat_entity):
             if "You have reached your hunt limit." in response_text:
                 logger.info("Received 'You have reached your hunt limit.' message, stopping /explore")
                 break
-            await asyncio.sleep(10)
+            await asyncio.sleep(20)
         except MessageNotModifiedError:
             logger.info("Message not modified, skipping")
         except Exception as e:
