@@ -1,10 +1,15 @@
 import asyncio
 import logging
 import os
+import threading
 from telethon import events, TelegramClient
 from telethon.sessions import StringSession
+import uvloop
+from flask import Flask, request, jsonify
 
-asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+app = Flask(__name__)
+
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -42,23 +47,19 @@ async def handle_new_message(event):
         tasks = [button.click() for row in event.buttons for button in row]
         await asyncio.gather(*tasks)
 
-@client.on(events.NewMessage(pattern='/on'))
-async def turn_on(event):
-    if event.sender.username == '@y2god':
-        global is_on
-        is_on = True
-        await event.respond("Switch is now on")
-    else:
-        await event.respond("You are not authorized to control the switch.")
+@app.route('/on', methods=['POST'])
+def turn_on():
+    global is_on
+    is_on = True
+    logger.info("Switch is now on")
+    return jsonify({'status': 'on'})
 
-@client.on(events.NewMessage(pattern='/off'))
-async def turn_off(event):
-    if event.sender.username == '@y2god':
-        global is_on
-        is_on = False
-        await event.respond("Switch is now off")
-    else:
-        await event.respond("You are not authorized to control the switch.")
+@app.route('/off', methods=['POST'])
+def turn_off():
+    global is_on
+    is_on = False
+    logger.info("Switch is now off")
+    return jsonify({'status': 'off'})
 
 async def send_actions():
     async def send_propose():
@@ -103,7 +104,13 @@ async def send_actions():
             logger.info("Switch is off, not sending any actions")
             await asyncio.sleep(60)  # Wait for 1 minute before checking the switch again
 
+def run_flask_app():
+    app.run(host='0.0.0.0', port=10000)
+
 if __name__ == "__main__":
+    flask_thread = threading.Thread(target=run_flask_app)
+    flask_thread.daemon = True
+    flask_thread.start()
     client.start()
 
     client.loop.create_task(send_actions())
