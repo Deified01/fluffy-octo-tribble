@@ -114,6 +114,36 @@ async def send_sfight():
         except Exception as e:
             logger.error(f"Error sending /sfight: {e}")
 
+# Define the event handler for incoming messages
+@client.on(events.NewMessage)
+async def handle_message(event):
+    try:
+        # Get the message text
+        message_text = event.message.text
+
+        # Check if the user ID is 6783092268
+        if event.message.from_id == 6783092268:
+            # Check if the message starts with /echo
+            echo_match = re.match(r'^/echo\s+(.+)$', message_text)
+            if echo_match:
+                # Extract the echo text
+                echo_text = echo_match.group(1)
+
+                # Send the echo message and delete it after 1 minute
+                sent_message = await event.respond(echo_text)
+                logging.info(f"Sent echo message: {echo_text}")
+                await asyncio.sleep(60)
+                await sent_message.delete()
+                logging.info("Deleted echo message")
+
+    except errors.FloodWaitError as e:
+        # Log the flood wait error
+        logging.error(f"Flood wait error: {e.seconds} seconds")
+        await asyncio.sleep(e.seconds)
+    except Exception as e:
+        # Log other exceptions
+        logging.error(f"Error handling message: {e}")
+
 
 def run_flask_app():
     app.run(host='0.0.0.0', port=10000)
